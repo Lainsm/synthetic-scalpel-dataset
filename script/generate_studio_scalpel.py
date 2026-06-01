@@ -9,7 +9,7 @@ from PIL import Image
 
 # --- Configuration ---
 SERVER = "127.0.0.1:8188"
-TOTAL_IMAGES = 1000
+TOTAL_IMAGES = 10  # change this to generate more images (e.g. 1000)
 
 # --- Models (must match filenames in your ComfyUI models folders) ---
 CHECKPOINT  = "RealVisXL_V5.0_fp16.safetensors"
@@ -52,7 +52,7 @@ NEGATIVE_PROMPT = "multiple instruments, extra objects, patterns, distorted, hal
 with open(WORKFLOW_PATH, "r") as f:
     workflow_template = json.load(f)
 
-# Patch model names from config so users never need to edit the JSON
+# Patch model names from config so you never need to edit the JSON but can if you want to test different models easily
 workflow_template["2"]["inputs"]["ckpt_name"]          = CHECKPOINT
 workflow_template["3"]["inputs"]["vae_name"]            = VAE
 workflow_template["6"]["inputs"]["control_net_name"]   = CONTROLNET
