@@ -78,6 +78,14 @@ TOTAL_IMAGES = 1000          # total number of images to generate
 
 ---
 
+## Example output
+
+| | |
+|---|---|
+| ![example 1](output/scalpel_0010.png) | ![example 2](output/scalpel_0011.png) |
+
+---
+
 ## Project structure
 
 ```
