@@ -1,0 +1,3 @@
+# Source
+
+The two available images are example that the script generate. The entire synthetic dataset can be found on my kaggle repo: "https://www.kaggle.com/datasets/maliklainsbury/synthetic-surgical-scalpel-w-yolo-box"

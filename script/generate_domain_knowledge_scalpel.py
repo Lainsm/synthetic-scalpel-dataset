@@ -7,7 +7,7 @@ import os
 import shutil
 from PIL import Image
 
-# --- Configuration ---
+############### Configuration ###############
 SERVER = "127.0.0.1:8188"
 COMFYUI_INPUT_DIR = "/home/start/projects/ComfyUI/input"
 IMAGE_DIR = "/home/start/assignments/HDS05/data/realScalpelDataset/train/images/"
