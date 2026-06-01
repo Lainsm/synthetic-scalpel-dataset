@@ -2,6 +2,4 @@ __pycache__/
 *.pyc
 *.pyo
 generation_log.txt
-*.png
-*.jpg
 *.jpeg
