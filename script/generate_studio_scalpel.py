@@ -11,12 +11,18 @@ from PIL import Image
 SERVER = "127.0.0.1:8188"
 TOTAL_IMAGES = 1000
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-IMAGE_DIR = os.path.join(BASE_DIR, "input")
-OUTPUT_DIR = os.path.join(BASE_DIR, "output")
+# --- Models (must match filenames in your ComfyUI models folders) ---
+CHECKPOINT  = "RealVisXL_V5.0_fp16.safetensors"
+VAE         = "sdxl-vae-fp16-fix.safetensors"
+CONTROLNET  = "SDXL/controlnet-union-sdxl-1.0/diffusion_pytorch_model_promax.safetensors"
+UPSCALE     = "4x-UltraSharp.pth"
+
+# --- Paths (no changes needed) ---
+BASE_DIR      = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+IMAGE_DIR     = os.path.join(BASE_DIR, "input")
+OUTPUT_DIR    = os.path.join(BASE_DIR, "output")
 WORKFLOW_PATH = os.path.join(BASE_DIR, "json", "comfyUI_instructions.json")
 
-# Scenarios
 SCENARIOS = [
     "isolated on white background, product photography, clean sterile instrument",
     "on green surgical drape, operating theatre, sterile field",
@@ -46,13 +52,19 @@ NEGATIVE_PROMPT = "multiple instruments, extra objects, patterns, distorted, hal
 with open(WORKFLOW_PATH, "r") as f:
     workflow_template = json.load(f)
 
+# Patch model names from config so users never need to edit the JSON
+workflow_template["2"]["inputs"]["ckpt_name"]          = CHECKPOINT
+workflow_template["3"]["inputs"]["vae_name"]            = VAE
+workflow_template["6"]["inputs"]["control_net_name"]   = CONTROLNET
+workflow_template["20"]["inputs"]["model_name"]         = UPSCALE
+
 
 def check_server():
     try:
         urllib.request.urlopen(f"http://{SERVER}/system_stats", timeout=3)
     except Exception:
-        print(f"❌ Cannot connect to ComfyUI at {SERVER}")
-        print("   Make sure ComfyUI is running before starting this script.")
+        print(f"Cannot connect to ComfyUI at {SERVER}")
+        print("Make sure ComfyUI is running before starting this script.")
         exit(1)
 
 def upload_image(img, filename):
@@ -83,11 +95,7 @@ def get_history(prompt_id):
         return json.loads(response.read())
 
 def get_image(filename, subfolder, folder_type):
-    params = urllib.parse.urlencode({
-        "filename": filename,
-        "subfolder": subfolder,
-        "type": folder_type
-    })
+    params = urllib.parse.urlencode({"filename": filename, "subfolder": subfolder, "type": folder_type})
     with urllib.request.urlopen(f"http://{SERVER}/view?{params}") as response:
         return response.read()
 
@@ -95,42 +103,32 @@ def wait_for_completion(prompt_id, timeout=300):
     start = time.time()
     while time.time() - start < timeout:
         history = get_history(prompt_id)
-        if prompt_id in history:
-            outputs = history[prompt_id].get("outputs", {})
-            if outputs:
-                return history[prompt_id]
+        if prompt_id in history and history[prompt_id].get("outputs"):
+            return history[prompt_id]
         time.sleep(2)
     return None
 
 
 def generate_image(source_image, scenario, output_path):
     log_path = os.path.join(OUTPUT_DIR, "generation_log.txt")
-    with open(log_path, "a") as log:
-        log.write(f"{output_path} | {os.path.basename(source_image)} | {scenario}\n")
     workflow = json.loads(json.dumps(workflow_template))
 
     img = Image.open(source_image)
-
     angle = random.choice([0, 90, 180, 270])
     if angle != 0:
         img = img.rotate(angle, expand=True)
-
     if random.random() > 0.5:
         img = img.transpose(Image.FLIP_LEFT_RIGHT)
 
     image_filename = f"aug_{angle}_{os.path.basename(source_image)}"
     upload_image(img, image_filename)
 
-    workflow["1"]["inputs"]["image"] = image_filename
-    workflow["4"]["inputs"]["text"] = f"{POSITIVE_BASE}, {scenario}"
-    workflow["5"]["inputs"]["text"] = NEGATIVE_PROMPT
-    workflow["12"]["inputs"]["seed"] = random.randint(1, 999999999999999)
-
+    workflow["1"]["inputs"]["image"]  = image_filename
+    workflow["4"]["inputs"]["text"]   = f"{POSITIVE_BASE}, {scenario}"
+    workflow["5"]["inputs"]["text"]   = NEGATIVE_PROMPT
+    workflow["12"]["inputs"]["seed"]  = random.randint(1, 999999999999999)
     workflow["99"] = {
-        "inputs": {
-            "filename_prefix": "synthetic_scalpel",
-            "images": ["13", 0]
-        },
+        "inputs": {"filename_prefix": "synthetic_scalpel", "images": ["13", 0]},
         "class_type": "SaveImage",
         "_meta": {"title": "Save Image"}
     }
@@ -141,25 +139,19 @@ def generate_image(source_image, scenario, output_path):
 
     history = wait_for_completion(prompt_id)
 
-    if history and "outputs" in history:
-        if "99" in history["outputs"]:
-            for image_data in history["outputs"]["99"]["images"]:
-                img_data = get_image(
-                    image_data["filename"],
-                    image_data["subfolder"],
-                    image_data["type"]
-                )
-                with open(output_path, "wb") as f:
-                    f.write(img_data)
-
-                with open(log_path, "a") as log:
-                    log.write(f"{output_path} | {os.path.basename(source_image)} | angle={angle} | {scenario}\n")
-
-                return True
-        else:
-            print(f"  ERROR: Node 99 not in outputs: {list(history.get('outputs', {}).keys())}")
+    if history and "99" in history.get("outputs", {}):
+        for image_data in history["outputs"]["99"]["images"]:
+            img_data = get_image(image_data["filename"], image_data["subfolder"], image_data["type"])
+            with open(output_path, "wb") as f:
+                f.write(img_data)
+            with open(log_path, "a") as log:
+                log.write(f"{output_path} | {os.path.basename(source_image)} | angle={angle} | {scenario}\n")
+            return True
+    else:
+        print(f"  ERROR: outputs={list(history.get('outputs', {}).keys()) if history else 'timeout'}")
 
     return False
+
 
 def main():
     check_server()
@@ -169,16 +161,13 @@ def main():
         os.path.join(IMAGE_DIR, f) for f in os.listdir(IMAGE_DIR)
         if f.lower().endswith((".jpg", ".jpeg", ".png"))
     ]
-
     if not valid_images:
         print(f"No images found in {IMAGE_DIR}")
         return
-
     for img in valid_images:
-        print(f"✅ Found: {os.path.basename(img)}")
+        print(f"Found: {os.path.basename(img)}")
 
-    print(f"\nFound {len(valid_images)} images")
-    print(f"Generating {TOTAL_IMAGES} synthetic scalpel images...")
+    print(f"\nGenerating {TOTAL_IMAGES} synthetic scalpel images...")
     print(f"Output: {OUTPUT_DIR}\n")
 
     generated = 0
@@ -187,29 +176,25 @@ def main():
     while generated < TOTAL_IMAGES:
         source_image = valid_images[generated % len(valid_images)]
         scenario = SCENARIOS[generated % len(SCENARIOS)]
-
         if random.random() > 0.5:
             scenario = random.choice(SCENARIOS)
 
         output_path = os.path.join(OUTPUT_DIR, f"scalpel_{generated:04d}.png")
-
         print(f"[{generated+1}/{TOTAL_IMAGES}] {os.path.basename(source_image)} | {scenario[:45]}...")
 
-        success = generate_image(source_image, scenario, output_path)
-
-        if success:
+        if generate_image(source_image, scenario, output_path):
             generated += 1
-            print(f"✅ Saved: scalpel_{generated:04d}.png")
+            print(f"Saved: scalpel_{generated:04d}.png")
             failures = 0
         else:
             failures += 1
-            print(f"❌ Failed (attempt {failures})")
+            print(f"Failed (attempt {failures})")
             time.sleep(5)
             if failures > 5:
                 print("Too many consecutive failures — is ComfyUI running?")
                 break
 
-    print(f"\n🎉 Done! Generated {generated}/{TOTAL_IMAGES} scalpel images")
+    print(f"\nDone! Generated {generated}/{TOTAL_IMAGES} scalpel images")
     print(f"Saved to: {OUTPUT_DIR}")
 
 if __name__ == "__main__":
