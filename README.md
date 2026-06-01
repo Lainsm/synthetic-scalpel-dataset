@@ -13,6 +13,16 @@ Source images used are from the [Labeled Surgical Tools dataset](https://www.kag
 - Python 3.x with [Pillow](https://pypi.org/project/Pillow/) (`pip install Pillow`)
 - [ComfyUI](https://github.com/comfyanonymous/ComfyUI) installed and running
 
+### Installing ComfyUI
+
+```bash
+git clone https://github.com/comfyanonymous/ComfyUI.git
+cd ComfyUI
+pip install -r requirements.txt
+```
+
+Full setup instructions are on the [ComfyUI GitHub page](https://github.com/comfyanonymous/ComfyUI).
+
 ### ComfyUI models
 
 Download these and place them in the correct ComfyUI folders:
@@ -41,8 +51,9 @@ Download these and place them in the correct ComfyUI folders:
 
 3. Add your source scalpel images to the `input/` folder (`.jpg`, `.jpeg`, or `.png`).
 
-4. Start ComfyUI in a separate terminal:
+4. Start ComfyUI in a separate terminal (from inside the ComfyUI folder):
    ```bash
+   cd ComfyUI
    python main.py
    ```
 
