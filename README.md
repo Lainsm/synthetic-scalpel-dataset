@@ -2,7 +2,7 @@
 
 Generates synthetic surgical scalpel images using ComfyUI with ControlNet (canny edge) + SDXL img2img. Takes real scalpel photos as input and produces varied synthetic versions across different surgical scenarios and lighting conditions.
 
-The full generated dataset is available on Kaggle: [synthetic-surgical-scalpel-w-yolo-box](https://www.kaggle.com/datasets/maliklainsbury/synthetic-surgical-scalpel-w-yolo-box)
+The full generated dataset is available on Kaggle: [synthetic-surgical-scalpel-w-yolo-box](https://www.kaggle.com/datasets/maliklainsbury/synthetic-surgical-scalpel-w-yolo-box). This synthetic dataset for a research project regarding Retained Surgical Instrument in complete non-Lambertian environment, the repo is available here: [GLARE: A Geometric–Semantic Ensemble for Non-Lambertian Post-Operative Instrument Counting](https://github.com/Lainsm/GLARE)
 
 Source images used are from the [Labeled Surgical Tools dataset](https://www.kaggle.com/datasets/dilavado/labeled-surgical-tools) on Kaggle.
 
@@ -24,6 +24,7 @@ pip install -r requirements.txt
 Full setup instructions are on the [ComfyUI GitHub page](https://github.com/comfyanonymous/ComfyUI).
 
 ### ComfyUI models
+All models used are open source and avalaible on CivitAI or HuggingFace (source added next to model name). I used this combination of models but feel free to experiment.
 
 Download these and place them in the correct ComfyUI folders:
 
@@ -80,7 +81,7 @@ TOTAL_IMAGES = 1000          # total number of images to generate
 
 ## Examples
 
-| Input | Output |
+| Real Input | Syntethic Output |
 |-------|--------|
 | ![input 1](input/bisturi345.jpg) | ![output 1](output/scalpel_0010.png) |
 | ![input 2](input/bisturi346.jpg) | ![output 2](output/scalpel_0011.png) |
