@@ -1,10 +1,10 @@
 # Synthetic Scalpel Dataset Generator
 
-Generates synthetic surgical scalpel images using ComfyUI with ControlNet (canny edge) + SDXL img2img. Takes real scalpel photos as input and produces varied synthetic versions across different surgical scenarios and lighting conditions.
+Generates synthetic surgical instruments (or any kind of) images using ComfyUI with ControlNet (canny edge) + SDXL img2img. Takes real scalpel photos as input and produces varied synthetic versions across different surgical scenarios and lighting conditions.
 
-The full generated dataset is available on Kaggle: [synthetic-surgical-scalpel-w-yolo-box](https://www.kaggle.com/datasets/maliklainsbury/synthetic-surgical-scalpel-w-yolo-box). This synthetic dataset for a research project regarding Retained Surgical Instrument in complete non-Lambertian environment, the repo is available here: [GLARE: A Geometric–Semantic Ensemble for Non-Lambertian Post-Operative Instrument Counting](https://github.com/Lainsm/GLARE)
+The full generated dataset is available on Kaggle: [synthetic-surgical-scalpel-w-yolo-box](https://www.kaggle.com/datasets/maliklainsbury/synthetic-surgical-scalpel-w-yolo-box). This synthetic dataset was generated for a research project regarding Retained Surgical Instrument in Complete Non-Lambertian Environment, the repo is available here: [GLARE: A Geometric–Semantic Ensemble for Non-Lambertian Post-Operative Instrument Counting](https://github.com/Lainsm/GLARE)
 
-Source images used are from the [Labeled Surgical Tools dataset](https://www.kaggle.com/datasets/dilavado/labeled-surgical-tools) on Kaggle.
+Source images I used are from the [Labeled Surgical Tools dataset](https://www.kaggle.com/datasets/dilavado/labeled-surgical-tools) on Kaggle.
 
 ---
 
