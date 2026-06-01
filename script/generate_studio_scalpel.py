@@ -8,20 +8,13 @@ from PIL import Image
 
 # --- Configuration ---
 SERVER = "127.0.0.1:8188"
-COMFYUI_INPUT_DIR = "/home/start/projects/ComfyUI/input"
-IMAGE_DIR = "/home/start/assignments/HDS05/data/surgical-dataset/Surgical-Dataset/Images/Scalpel/Alone/"
-OUTPUT_DIR = "/home/start/projects/synthetic_dataset/scalpel/"
+COMFYUI_INPUT_DIR = "/path/to/ComfyUI/input"  # update to your ComfyUI input directory
 TOTAL_IMAGES = 1000
 
-WORKFLOW_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "final_version.json")
-
-# Your specific scalpel images
-SELECTED_IMAGES = [
-    "bisturi249.jpg", "bisturi350.jpg", "bisturi338.jpg", "bisturi339.jpg",
-    "bisturi239.jpg", "bisturi345.jpg", "bisturi346.jpg", "bisturi7.jpg",
-    "bisturi348.jpg", "bisturi342.jpg", "bisturi358.jpg", "bisturi351.jpg",
-    "bisturi352.jpg", "bisturi354.jpg"
-]
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+IMAGE_DIR = os.path.join(BASE_DIR, "input")
+OUTPUT_DIR = os.path.join(BASE_DIR, "output")
+WORKFLOW_PATH = os.path.join(BASE_DIR, "json", "comfyUI_instructions.json")
 
 # Scenarios
 SCENARIOS = [
@@ -146,18 +139,17 @@ def generate_image(source_image, scenario, output_path):
 def main():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    valid_images = []
-    for img in SELECTED_IMAGES:
-        full_path = os.path.join(IMAGE_DIR, img)
-        if os.path.exists(full_path):
-            valid_images.append(full_path)
-            print(f"✅ Found: {img}")
-        else:
-            print(f"❌ Missing: {img}")
+    valid_images = [
+        os.path.join(IMAGE_DIR, f) for f in os.listdir(IMAGE_DIR)
+        if f.lower().endswith((".jpg", ".jpeg", ".png"))
+    ]
 
     if not valid_images:
-        print("No valid images found!")
+        print(f"No images found in {IMAGE_DIR}")
         return
+
+    for img in valid_images:
+        print(f"✅ Found: {os.path.basename(img)}")
 
     print(f"\nFound {len(valid_images)} images")
     print(f"Generating {TOTAL_IMAGES} synthetic scalpel images...")
@@ -173,7 +165,7 @@ def main():
         if random.random() > 0.5:
             scenario = random.choice(SCENARIOS)
 
-        output_path = f"{OUTPUT_DIR}scalpel_{generated:04d}.png"
+        output_path = os.path.join(OUTPUT_DIR, f"scalpel_{generated:04d}.png")
 
         print(f"[{generated+1}/{TOTAL_IMAGES}] {os.path.basename(source_image)} | {scenario[:45]}...")
 
