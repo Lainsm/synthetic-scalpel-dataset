@@ -1,3 +1,4 @@
+import io
 import json
 import random
 import urllib.request
@@ -8,7 +9,6 @@ from PIL import Image
 
 # --- Configuration ---
 SERVER = "127.0.0.1:8188"
-COMFYUI_INPUT_DIR = "/path/to/ComfyUI/input"  # update to your ComfyUI input directory
 TOTAL_IMAGES = 1000
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -46,6 +46,23 @@ NEGATIVE_PROMPT = "multiple instruments, extra objects, patterns, distorted, hal
 with open(WORKFLOW_PATH, "r") as f:
     workflow_template = json.load(f)
 
+
+def upload_image(img, filename):
+    buf = io.BytesIO()
+    img.save(buf, format="JPEG")
+    image_data = buf.getvalue()
+    boundary = b"----FormBoundary"
+    body = (
+        b"--" + boundary + b"\r\n"
+        b'Content-Disposition: form-data; name="image"; filename="' + filename.encode() + b'"\r\n'
+        b"Content-Type: image/jpeg\r\n\r\n"
+    ) + image_data + b"\r\n--" + boundary + b"--\r\n"
+    req = urllib.request.Request(
+        f"http://{SERVER}/upload/image",
+        data=body,
+        headers={"Content-Type": "multipart/form-data; boundary=----FormBoundary"}
+    )
+    urllib.request.urlopen(req)
 
 def queue_prompt(prompt):
     data = json.dumps({"prompt": prompt}).encode('utf-8')
@@ -94,7 +111,7 @@ def generate_image(source_image, scenario, output_path):
         img = img.transpose(Image.FLIP_LEFT_RIGHT)
 
     image_filename = f"aug_{angle}_{os.path.basename(source_image)}"
-    img.save(os.path.join(COMFYUI_INPUT_DIR, image_filename))
+    upload_image(img, image_filename)
 
     workflow["1"]["inputs"]["image"] = image_filename
     workflow["4"]["inputs"]["text"] = f"{POSITIVE_BASE}, {scenario}"
