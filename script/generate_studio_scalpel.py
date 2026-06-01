@@ -7,22 +7,25 @@ import time
 import os
 from PIL import Image
 
-# --- Configuration ---
+############# configuration #############
 SERVER = "127.0.0.1:8188"
 TOTAL_IMAGES = 10  # change this to generate more images (e.g. 1000)
 
-# --- Models (must match filenames in your ComfyUI models folders) ---
+############## Models (must match filenames in your ComfyUI models folders) #############
 CHECKPOINT  = "RealVisXL_V5.0_fp16.safetensors"
 VAE         = "sdxl-vae-fp16-fix.safetensors"
 CONTROLNET  = "SDXL/controlnet-union-sdxl-1.0/diffusion_pytorch_model_promax.safetensors"
 UPSCALE     = "4x-UltraSharp.pth"
 
-# --- Paths (no changes needed) ---
+# ############# Paths (no changes needed) #############
 BASE_DIR      = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 IMAGE_DIR     = os.path.join(BASE_DIR, "input")
 OUTPUT_DIR    = os.path.join(BASE_DIR, "output")
 WORKFLOW_PATH = os.path.join(BASE_DIR, "json", "comfyUI_instructions.json")
 
+# Some scenarios to add variety to the generated images. You can customise or expand this list as needed. These are the one I used to generate. 
+# Not all generated images will match these perfectly since the prompt is just one part of the workflow 
+# and the source image also has a big influence, but it should add some nice variety to your dataset.
 SCENARIOS = [
     "isolated on white background, product photography, clean sterile instrument",
     "on green surgical drape, operating theatre, sterile field",
@@ -53,6 +56,10 @@ with open(WORKFLOW_PATH, "r") as f:
     workflow_template = json.load(f)
 
 # Patch model names from config so you never need to edit the JSON but can if you want to test different models easily
+# I found that these models gave me the best results for scalpel generation. 
+# Feel free to experiment with different ones from your ComfyUI setup. 
+# Just make sure to update the names here to match the filenames in your models folders.
+
 workflow_template["2"]["inputs"]["ckpt_name"]          = CHECKPOINT
 workflow_template["3"]["inputs"]["vae_name"]            = VAE
 workflow_template["6"]["inputs"]["control_net_name"]   = CONTROLNET
