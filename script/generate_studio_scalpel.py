@@ -47,6 +47,14 @@ with open(WORKFLOW_PATH, "r") as f:
     workflow_template = json.load(f)
 
 
+def check_server():
+    try:
+        urllib.request.urlopen(f"http://{SERVER}/system_stats", timeout=3)
+    except Exception:
+        print(f"❌ Cannot connect to ComfyUI at {SERVER}")
+        print("   Make sure ComfyUI is running before starting this script.")
+        exit(1)
+
 def upload_image(img, filename):
     buf = io.BytesIO()
     img.save(buf, format="JPEG")
@@ -154,6 +162,7 @@ def generate_image(source_image, scenario, output_path):
     return False
 
 def main():
+    check_server()
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     valid_images = [
