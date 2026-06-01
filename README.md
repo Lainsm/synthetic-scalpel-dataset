@@ -78,11 +78,12 @@ TOTAL_IMAGES = 1000          # total number of images to generate
 
 ---
 
-## Example output
+## Examples
 
-| | |
-|---|---|
-| ![example 1](output/scalpel_0010.png) | ![example 2](output/scalpel_0011.png) |
+| Input | Output |
+|-------|--------|
+| ![input 1](input/bisturi345.jpg) | ![output 1](output/scalpel_0010.png) |
+| ![input 2](input/bisturi346.jpg) | ![output 2](output/scalpel_0011.png) |
 
 ---
 
